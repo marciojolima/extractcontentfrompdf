@@ -1,0 +1,10 @@
+[project]
+name = "ExtractContentFromPdf"
+version = "0.1.0"
+description = "Extrair conteudo de pdf"
+authors = [
+    {name = "Márcio Lima",email = "marciocad@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13,<4"
+dependencies = []
