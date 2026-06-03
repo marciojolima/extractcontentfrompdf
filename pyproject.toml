@@ -1,10 +1,18 @@
-[project]
-name = "ExtractContentFromPdf"
+[tool.poetry]
+name = "extractcontentfrompdf"
 version = "0.1.0"
-description = "Extrair conteudo de pdf"
-authors = [
-    {name = "Márcio Lima",email = "marciocad@gmail.com"}
-]
+description = "Extracao e sanitizacao de conteudo textual de PDFs nativos"
+authors = ["Márcio Lima <marciocad@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.13,<4"
-dependencies = []
+packages = [{ include = "extractcontentfrompdf", from = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.13,<4.0"
+pdfplumber = "^0.11.7"
+
+[tool.poetry.scripts]
+extract-pdf = "extractcontentfrompdf.extractor:main"
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
