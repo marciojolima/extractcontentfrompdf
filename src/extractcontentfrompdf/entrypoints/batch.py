@@ -16,7 +16,7 @@ from extractcontentfrompdf.security.exceptions import PdfSecurityError
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    """Le os argumentos da CLI para processamento em batch."""
+    """Le os argumentos do entrypoint para processamento em batch."""
     parser = argparse.ArgumentParser(
         prog="extract-pdf-batch",
         description=(

@@ -16,7 +16,7 @@ from extractcontentfrompdf.security.exceptions import PdfSecurityError
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    """Le os argumentos da CLI para processamento de um unico PDF."""
+    """Le os argumentos do entrypoint para processamento de um unico PDF."""
     parser = argparse.ArgumentParser(
         prog="extract-pdf",
         description="Extrai texto de um arquivo PDF e salva o resultado em Markdown.",
