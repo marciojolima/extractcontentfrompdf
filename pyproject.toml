@@ -18,6 +18,7 @@ extract-pdf-hierarchical = "extractcontentfrompdf.hierarchical_batch_cli:main"
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.3"
 pytest-cov = "^7.1.0"
+poethepoet = "^0.33.1"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
@@ -37,6 +38,11 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 no_implicit_optional = true
 strict_equality = true
+
+[tool.poe.tasks]
+test = "pytest"
+coverage = "pytest --cov=extractcontentfrompdf --cov-report=term-missing --cov-report=html"
+check = "pytest"
 
 [build-system]
 requires = ["poetry-core>=1.9.0"]
