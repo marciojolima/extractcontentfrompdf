@@ -1,8 +1,10 @@
+import logging
 from pathlib import Path
 from unittest.mock import Mock
 
 from extractcontentfrompdf.converter import PdfToMarkdownConverter
 from extractcontentfrompdf.models import ExtractionResult, MarkdownDocument
+from extractcontentfrompdf.security.models import PdfSecurityIssue, PdfSecurityReport
 
 
 def test_convert_orquestra_fluxo_entre_dependencias() -> None:
@@ -22,7 +24,7 @@ def test_convert_orquestra_fluxo_entre_dependencias() -> None:
     output_dir = Path("saida")
     extraction_result = ExtractionResult(page_count=2, content="conteudo")
     markdown_document = MarkdownDocument(title="entrada", content="# entrada\n")
-    security_report = Mock()
+    security_report = PdfSecurityReport(issues=())
     repository.save.return_value = output_dir / "entrada.md"
     extractor.extract.return_value = extraction_result
     markdown_builder.build.return_value = markdown_document
@@ -38,3 +40,70 @@ def test_convert_orquestra_fluxo_entre_dependencias() -> None:
     markdown_builder.build.assert_called_once()
     repository.save.assert_called_once_with(output_dir, markdown_document)
     assert resultado == output_dir / "entrada.md"
+
+
+def test_convert_registra_log_quando_triagem_esta_limpa(
+    caplog,
+) -> None:
+    extractor = Mock()
+    markdown_builder = Mock()
+    repository = Mock()
+    security_scanner = Mock()
+    security_policy = Mock()
+    converter = PdfToMarkdownConverter(
+        extractor=extractor,
+        markdown_builder=markdown_builder,
+        repository=repository,
+        security_scanner=security_scanner,
+        security_policy=security_policy,
+    )
+    repository.save.return_value = Path("saida/entrada.md")
+    extractor.extract.return_value = ExtractionResult(page_count=1, content="conteudo")
+    markdown_builder.build.return_value = MarkdownDocument(
+        title="entrada",
+        content="# entrada\n",
+    )
+    security_scanner.scan.return_value = PdfSecurityReport(issues=())
+
+    with caplog.at_level(logging.INFO):
+        converter.convert(Path("entrada.pdf"), Path("saida"))
+
+    assert "Triagem de seguranca limpa para entrada.pdf" in caplog.text
+
+
+def test_convert_registra_log_quando_triagem_encontra_risco(
+    caplog,
+) -> None:
+    extractor = Mock()
+    markdown_builder = Mock()
+    repository = Mock()
+    security_scanner = Mock()
+    security_policy = Mock()
+    converter = PdfToMarkdownConverter(
+        extractor=extractor,
+        markdown_builder=markdown_builder,
+        repository=repository,
+        security_scanner=security_scanner,
+        security_policy=security_policy,
+    )
+    repository.save.return_value = Path("saida/entrada.md")
+    extractor.extract.return_value = ExtractionResult(page_count=1, content="conteudo")
+    markdown_builder.build.return_value = MarkdownDocument(
+        title="entrada",
+        content="# entrada\n",
+    )
+    security_scanner.scan.return_value = PdfSecurityReport(
+        issues=(
+            PdfSecurityIssue(
+                code="javascript",
+                description="codigo JavaScript embutido",
+                blocking=True,
+            ),
+        )
+    )
+
+    with caplog.at_level(logging.WARNING):
+        converter.convert(Path("entrada.pdf"), Path("saida"))
+
+    assert "Triagem de seguranca encontrou risco em entrada.pdf" in caplog.text
+    assert "codigo JavaScript embutido" in caplog.text

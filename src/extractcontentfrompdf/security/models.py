@@ -21,6 +21,16 @@ class PdfSecurityReport:
     issues: tuple[PdfSecurityIssue, ...]
 
     @property
+    def has_issues(self) -> bool:
+        """Indica se a triagem encontrou qualquer sinal relevante."""
+        return bool(self.issues)
+
+    @property
+    def has_blocking_issues(self) -> bool:
+        """Indica se a triagem encontrou sinais que impedem o processamento."""
+        return any(issue.blocking for issue in self.issues)
+
+    @property
     def is_safe(self) -> bool:
         """Indica se o documento passou pela triagem sem bloqueios."""
-        return not any(issue.blocking for issue in self.issues)
+        return not self.has_blocking_issues
