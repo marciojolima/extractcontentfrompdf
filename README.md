@@ -2,25 +2,25 @@
 
 Projeto em Python para extrair texto de PDFs nativos e gerar arquivos Markdown simples, leves e prontos para consumo por fluxos de busca, RAG e LLMs.
 
-## Objetivo de negocio
+## Objetivo de negócio
 
-O projeto existe para transformar documentos PDF em conteudo textual mais facil de armazenar, indexar e reutilizar em processos automatizados.
+O projeto existe para transformar documentos PDF em conteúdo textual mais fácil de armazenar, indexar e reutilizar em processos automatizados.
 
-Na pratica, ele ajuda a:
+Na prática, ele ajuda a:
 
-- reduzir ruido no conteudo extraido
-- preservar o texto relevante para consulta e recuperacao
-- facilitar a preparacao de base documental para RAG
+- reduzir ruído no conteúdo extraído
+- preservar o texto relevante para consulta e recuperação
+- facilitar a preparação de base documental para RAG
 - diminuir custo de processamento em pipelines com LLM
 
-## Instalacao
+## Instalação
 
 Requisitos:
 
 - Python 3.13+
 - Poetry
 
-Instalacao:
+Instalação:
 
 ```bash
 poetry install
@@ -28,38 +28,39 @@ poetry install
 
 ## Uso
 
-Conversao de um unico PDF:
+Conversão de um único PDF:
 
 ```bash
 poetry run extract-pdf caminho/arquivo.pdf
 ```
 
-Conversao de um unico PDF com intervalo de paginas:
+Conversão de um único PDF com intervalo de páginas:
 
 ```bash
 poetry run extract-pdf caminho/arquivo.pdf 1 10
 ```
 
-Conversao hierarquica de uma ou mais pastas raiz:
+Conversão hierárquica de uma ou mais pastas raiz:
 
 ```bash
 poetry run extract-pdf-hierarchical data/in/Fase01 data/in/Fase02
 ```
 
-Por padrao, os arquivos Markdown sao gerados em `data/out`.
+Por padrão, os arquivos Markdown são gerados em `data/out`.
 
-Se quiser definir outro diretorio de saida:
+Se quiser definir outro diretório de saída:
 
 ```bash
 poetry run extract-pdf caminho/arquivo.pdf --output-dir resultado
 ```
 
-Tambem e possivel desativar a triagem de seguranca do PDF:
+Também é possível desativar a triagem de segurança do PDF:
 
 ```bash
 poetry run extract-pdf caminho/arquivo.pdf --no-check-security
 ```
 
-## Documentacao tecnica
+## Documentação técnica
 
-Detalhes tecnicos e decisoes de arquitetura estao em `docs/architecture.md`.
+Detalhes técnicos e decisões de arquitetura estão em
+<a href="./docs/architecture.md">docs/architecture.md</a>.
