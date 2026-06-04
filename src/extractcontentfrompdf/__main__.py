@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from extractcontentfrompdf.cli import main
+from extractcontentfrompdf.entrypoints.single import main
 
 
 if __name__ == "__main__":

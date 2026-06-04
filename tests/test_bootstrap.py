@@ -1,7 +1,7 @@
 import logging
 
-from extractcontentfrompdf.bootstrap import build_converter, configure_logging
 from extractcontentfrompdf.converter import PdfToMarkdownConverter
+from extractcontentfrompdf.entrypoints.bootstrap import build_converter, configure_logging
 
 
 def test_build_converter_retorna_fachada_pronta_para_uso() -> None:

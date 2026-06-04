@@ -12,8 +12,8 @@ pdfplumber = "^0.11.7"
 pypdf = "^6.12.2"
 
 [tool.poetry.scripts]
-extract-pdf = "extractcontentfrompdf.cli:main"
-extract-pdf-hierarchical = "extractcontentfrompdf.hierarchical_batch_cli:main"
+extract-pdf = "extractcontentfrompdf.entrypoints.single:main"
+extract-pdf-hierarchical = "extractcontentfrompdf.entrypoints.batch:main"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.3"

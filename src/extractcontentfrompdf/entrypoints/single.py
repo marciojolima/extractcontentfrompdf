@@ -1,4 +1,4 @@
-"""Ponto de entrada da linha de comando."""
+"""Ponto de entrada da linha de comando para conversao individual."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 from typing import Sequence
 
-from extractcontentfrompdf.bootstrap import (
+from extractcontentfrompdf.entrypoints.bootstrap import (
     DEFAULT_OUTPUT_DIR,
     build_converter,
     configure_logging,
@@ -63,7 +63,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Executa o fluxo principal da aplicacao."""
+    """Executa o fluxo principal da aplicacao para um unico PDF."""
     configure_logging()
     args = parse_args(argv)
     converter = build_converter()

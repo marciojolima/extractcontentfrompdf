@@ -3,18 +3,18 @@ from pathlib import Path
 
 import pytest
 
-from extractcontentfrompdf import cli
-from extractcontentfrompdf.bootstrap import DEFAULT_OUTPUT_DIR
+from extractcontentfrompdf.entrypoints import single
+from extractcontentfrompdf.entrypoints.bootstrap import DEFAULT_OUTPUT_DIR
 from extractcontentfrompdf.security.exceptions import PdfSecurityError
 
 
 def test_parse_args_exige_pdf_de_entrada() -> None:
     with pytest.raises(SystemExit):
-        cli.parse_args([])
+        single.parse_args([])
 
 
 def test_parse_args_le_pdf_e_intervalo_informados() -> None:
-    args = cli.parse_args(["arquivo.pdf", "2", "5", "--output-dir", "saida"])
+    args = single.parse_args(["arquivo.pdf", "2", "5", "--output-dir", "saida"])
 
     assert args.pdf_path == Path("arquivo.pdf")
     assert args.start_page == 2
@@ -24,7 +24,7 @@ def test_parse_args_le_pdf_e_intervalo_informados() -> None:
 
 
 def test_parse_args_aplica_defaults_restantes() -> None:
-    args = cli.parse_args(["arquivo.pdf"])
+    args = single.parse_args(["arquivo.pdf"])
 
     assert args.pdf_path == Path("arquivo.pdf")
     assert args.start_page is None
@@ -34,7 +34,7 @@ def test_parse_args_aplica_defaults_restantes() -> None:
 
 
 def test_parse_args_permite_desabilitar_triagem() -> None:
-    args = cli.parse_args(["arquivo.pdf", "--no-check-security"])
+    args = single.parse_args(["arquivo.pdf", "--no-check-security"])
 
     assert args.pdf_path == Path("arquivo.pdf")
     assert args.check_security is False
@@ -59,9 +59,9 @@ def test_main_retorna_zero_quando_conversao_tem_sucesso(
             assert check_security is True
             return output_dir / "arquivo.md"
 
-    monkeypatch.setattr(cli, "build_converter", lambda: FakeConverter())
+    monkeypatch.setattr(single, "build_converter", lambda: FakeConverter())
 
-    assert cli.main(["arquivo.pdf", "2", "5", "--output-dir", "saida"]) == 0
+    assert single.main(["arquivo.pdf", "2", "5", "--output-dir", "saida"]) == 0
 
 
 def test_main_retorna_um_quando_ha_erro_esperado(
@@ -78,9 +78,9 @@ def test_main_retorna_um_quando_ha_erro_esperado(
         ) -> Path:
             raise FileNotFoundError("nao encontrado")
 
-    monkeypatch.setattr(cli, "build_converter", lambda: FakeConverter())
+    monkeypatch.setattr(single, "build_converter", lambda: FakeConverter())
 
-    assert cli.main(["arquivo.pdf"]) == 1
+    assert single.main(["arquivo.pdf"]) == 1
 
 
 def test_main_retorna_um_quando_triagem_bloqueia_pdf(
@@ -97,9 +97,9 @@ def test_main_retorna_um_quando_triagem_bloqueia_pdf(
         ) -> Path:
             raise PdfSecurityError("bloqueado")
 
-    monkeypatch.setattr(cli, "build_converter", lambda: FakeConverter())
+    monkeypatch.setattr(single, "build_converter", lambda: FakeConverter())
 
-    assert cli.main(["arquivo.pdf"]) == 1
+    assert single.main(["arquivo.pdf"]) == 1
 
 
 def test_configure_logging_define_formato_basico(
@@ -112,7 +112,7 @@ def test_configure_logging_define_formato_basico(
 
     monkeypatch.setattr(logging, "basicConfig", fake_basic_config)
 
-    cli.configure_logging()
+    single.configure_logging()
 
     assert chamadas == {"level": logging.INFO, "format": "%(levelname)s: %(message)s"}
 
@@ -132,6 +132,6 @@ def test_main_repassa_parametro_para_ignorar_triagem(
             assert check_security is False
             return output_dir / "arquivo.md"
 
-    monkeypatch.setattr(cli, "build_converter", lambda: FakeConverter())
+    monkeypatch.setattr(single, "build_converter", lambda: FakeConverter())
 
-    assert cli.main(["arquivo.pdf", "--no-check-security", "--output-dir", "saida"]) == 0
+    assert single.main(["arquivo.pdf", "--no-check-security", "--output-dir", "saida"]) == 0
