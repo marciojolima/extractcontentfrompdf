@@ -8,6 +8,7 @@ from typing import Sequence
 from extractcontentfrompdf.converter.processor import PdfDocumentProcessor
 from extractcontentfrompdf.converter.requests import (
     BatchConversionRequest,
+    HierarchicalBatchConversionRequest,
     SingleFileConversionRequest,
 )
 from extractcontentfrompdf.converter.service import PdfConversionService
@@ -23,11 +24,13 @@ class PdfToMarkdownConverter:
         document_processor: PdfDocumentProcessor,
         single_file_strategy: ConversionStrategy,
         batch_strategy: ConversionStrategy,
+        hierarchical_batch_strategy: ConversionStrategy,
         service: PdfConversionService,
     ) -> None:
         self._document_processor = document_processor
         self._single_file_strategy = single_file_strategy
         self._batch_strategy = batch_strategy
+        self._hierarchical_batch_strategy = hierarchical_batch_strategy
         self._service = service
 
     def convert(
@@ -78,3 +81,17 @@ class PdfToMarkdownConverter:
             check_security=check_security,
         )
         return self._service.execute(self._batch_strategy, request)
+
+    def convert_hierarchical(
+        self,
+        root_dirs: Sequence[Path],
+        output_dir: Path,
+        check_security: bool = True,
+    ) -> list[Path]:
+        """Processa uma ou mais arvores e gera um Markdown por raiz informada."""
+        request = HierarchicalBatchConversionRequest(
+            root_dirs=tuple(root_dirs),
+            output_dir=output_dir,
+            check_security=check_security,
+        )
+        return self._service.execute(self._hierarchical_batch_strategy, request)

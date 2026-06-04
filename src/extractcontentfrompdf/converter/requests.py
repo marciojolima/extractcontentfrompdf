@@ -25,3 +25,12 @@ class BatchConversionRequest:
     output_dir: Path
     bundle_name: str
     check_security: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class HierarchicalBatchConversionRequest:
+    """Parametros necessarios para converter uma ou mais arvores de diretorios."""
+
+    root_dirs: tuple[Path, ...]
+    output_dir: Path
+    check_security: bool = True
