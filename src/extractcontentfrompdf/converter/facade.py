@@ -10,9 +10,13 @@ from extractcontentfrompdf.converter.requests import (
     HierarchicalBatchConversionRequest,
     SingleFileConversionRequest,
 )
-from extractcontentfrompdf.converter.service import PdfConversionService
-from extractcontentfrompdf.converter.strategies.base import ConversionStrategy
 from extractcontentfrompdf.models import MarkdownDocument
+from extractcontentfrompdf.converter.strategies.hierarchical_batch import (
+    HierarchicalBatchConversionStrategy,
+)
+from extractcontentfrompdf.converter.strategies.single_file import (
+    SingleFileConversionStrategy,
+)
 
 
 class PdfToMarkdownConverter:
@@ -21,14 +25,12 @@ class PdfToMarkdownConverter:
     def __init__(
         self,
         document_processor: PdfDocumentProcessor,
-        single_file_strategy: ConversionStrategy,
-        hierarchical_batch_strategy: ConversionStrategy,
-        service: PdfConversionService,
+        single_file_strategy: SingleFileConversionStrategy,
+        hierarchical_batch_strategy: HierarchicalBatchConversionStrategy,
     ) -> None:
         self._document_processor = document_processor
         self._single_file_strategy = single_file_strategy
         self._hierarchical_batch_strategy = hierarchical_batch_strategy
-        self._service = service
 
     def convert(
         self,
@@ -46,7 +48,7 @@ class PdfToMarkdownConverter:
             end_page=end_page,
             check_security=check_security,
         )
-        return self._service.execute(self._single_file_strategy, request)
+        return self._single_file_strategy.execute(request)
 
     def convert_document(
         self,
@@ -75,4 +77,4 @@ class PdfToMarkdownConverter:
             output_dir=output_dir,
             check_security=check_security,
         )
-        return self._service.execute(self._hierarchical_batch_strategy, request)
+        return self._hierarchical_batch_strategy.execute(request)

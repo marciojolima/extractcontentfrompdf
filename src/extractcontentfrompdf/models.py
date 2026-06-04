@@ -76,4 +76,5 @@ class MarkdownDocument:
     """Representa o documento Markdown pronto para persistencia."""
 
     title: str
+    body: str
     content: str

@@ -29,7 +29,9 @@ class HierarchicalBatchConversionStrategy:
     def execute(self, request: HierarchicalBatchConversionRequest) -> list[Path]:
         """Executa a conversao hierarquica para cada raiz informada."""
         if not request.root_dirs:
-            raise ValueError("Nenhum diretorio raiz foi informado para o processamento hierarquico.")
+            raise ValueError(
+                "Nenhum diretorio raiz foi informado para o processamento hierarquico."
+            )
 
         self._repository.ensure_output_directory(request.output_dir)
         output_paths: list[Path] = []
@@ -39,6 +41,8 @@ class HierarchicalBatchConversionStrategy:
                 root_dir=root_dir,
                 check_security=request.check_security,
             )
+            if root_node is None:
+                raise ValueError(f"Nenhum arquivo PDF foi encontrado em: {root_dir}")
             markdown_document = self._hierarchical_document_builder.build(root_node)
             output_paths.append(self._repository.save(request.output_dir, markdown_document))
 
@@ -48,8 +52,8 @@ class HierarchicalBatchConversionStrategy:
         self,
         root_dir: Path,
         check_security: bool,
-    ) -> DirectoryMarkdownNode:
-        """Constroi a representacao consolidada de um diretorio."""
+    ) -> DirectoryMarkdownNode | None:
+        """Constroi a representacao consolidada de um diretorio quando houver conteudo."""
         if not root_dir.exists():
             raise FileNotFoundError(f"Diretorio raiz nao encontrado: {root_dir}")
 
@@ -64,12 +68,14 @@ class HierarchicalBatchConversionStrategy:
             for pdf_path in self._list_pdf_files(root_dir)
         )
         child_nodes = tuple(
-            self._build_directory_node(child_dir, check_security)
+            child_node
             for child_dir in self._list_child_directories(root_dir)
+            if (child_node := self._build_directory_node(child_dir, check_security))
+            is not None
         )
 
         if not markdown_documents and not child_nodes:
-            raise ValueError(f"Nenhum arquivo PDF foi encontrado em: {root_dir}")
+            return None
 
         return DirectoryMarkdownNode(
             path=root_dir,

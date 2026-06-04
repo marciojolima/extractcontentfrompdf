@@ -16,6 +16,7 @@ def test_build_gera_markdown_com_conteudo_extraido() -> None:
     markdown = builder.build(document, extraction_result)
 
     assert markdown.title == "apostila"
+    assert markdown.body == "**Paginas do PDF:** 5\n**Paginas processadas:** 3\n\n## Pagina 1\n\nTexto"
     assert (
         markdown.content
         == "# apostila\n\n**Paginas do PDF:** 5\n**Paginas processadas:** 3\n\n## Pagina 1\n\nTexto\n"

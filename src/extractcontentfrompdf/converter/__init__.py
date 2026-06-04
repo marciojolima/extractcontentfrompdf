@@ -10,13 +10,11 @@ from extractcontentfrompdf.converter.requests import (
     HierarchicalBatchConversionRequest,
     SingleFileConversionRequest,
 )
-from extractcontentfrompdf.converter.service import PdfConversionService
 
 __all__ = [
     "DirectoryMarkdownNode",
     "HierarchicalBatchConversionRequest",
     "HierarchicalMarkdownDocumentBuilder",
-    "PdfConversionService",
     "PdfDocumentProcessor",
     "PdfToMarkdownConverter",
     "SingleFileConversionRequest",

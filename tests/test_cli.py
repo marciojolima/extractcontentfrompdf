@@ -4,42 +4,13 @@ from pathlib import Path
 import pytest
 
 from extractcontentfrompdf import cli
-from extractcontentfrompdf.converter import PdfDocumentProcessor, PdfToMarkdownConverter
-from extractcontentfrompdf.converter.strategies import (
-    HierarchicalBatchConversionStrategy,
-    SingleFileConversionStrategy,
-)
-from extractcontentfrompdf.file_repository import MarkdownFileRepository
-from extractcontentfrompdf.markdown_builder import MarkdownDocumentBuilder
-from extractcontentfrompdf.pdf_extractor import PdfTextExtractor
-from extractcontentfrompdf.security.policy import PdfSecurityPolicy
-from extractcontentfrompdf.security.scanner import PdfSecurityScanner
-from extractcontentfrompdf.sanitizer import TextSanitizer
+from extractcontentfrompdf.bootstrap import DEFAULT_OUTPUT_DIR
+from extractcontentfrompdf.security.exceptions import PdfSecurityError
 
 
-def test_build_converter_monta_dependencias_esperadas() -> None:
-    converter = cli.build_converter()
-
-    assert isinstance(converter, PdfToMarkdownConverter)
-    assert isinstance(converter._document_processor, PdfDocumentProcessor)
-    assert isinstance(converter._document_processor._extractor, PdfTextExtractor)
-    assert isinstance(converter._document_processor._extractor._sanitizer, TextSanitizer)
-    assert isinstance(converter._document_processor._markdown_builder, MarkdownDocumentBuilder)
-    assert isinstance(converter._document_processor._repository, MarkdownFileRepository)
-    assert isinstance(converter._document_processor._security_scanner, PdfSecurityScanner)
-    assert isinstance(converter._document_processor._security_policy, PdfSecurityPolicy)
-    assert isinstance(converter._single_file_strategy, SingleFileConversionStrategy)
-    assert isinstance(converter._hierarchical_batch_strategy, HierarchicalBatchConversionStrategy)
-
-
-def test_parse_args_usa_defaults_quando_nenhum_argumento_e_informado() -> None:
-    args = cli.parse_args([])
-
-    assert args.pdf_path == cli.INPUT_PDF_PATH
-    assert args.start_page is None
-    assert args.end_page is None
-    assert args.output_dir == cli.OUTPUT_DIR
-    assert args.check_security is True
+def test_parse_args_exige_pdf_de_entrada() -> None:
+    with pytest.raises(SystemExit):
+        cli.parse_args([])
 
 
 def test_parse_args_le_pdf_e_intervalo_informados() -> None:
@@ -52,6 +23,16 @@ def test_parse_args_le_pdf_e_intervalo_informados() -> None:
     assert args.check_security is True
 
 
+def test_parse_args_aplica_defaults_restantes() -> None:
+    args = cli.parse_args(["arquivo.pdf"])
+
+    assert args.pdf_path == Path("arquivo.pdf")
+    assert args.start_page is None
+    assert args.end_page is None
+    assert args.output_dir == DEFAULT_OUTPUT_DIR
+    assert args.check_security is True
+
+
 def test_parse_args_permite_desabilitar_triagem() -> None:
     args = cli.parse_args(["arquivo.pdf", "--no-check-security"])
 
@@ -59,7 +40,9 @@ def test_parse_args_permite_desabilitar_triagem() -> None:
     assert args.check_security is False
 
 
-def test_main_retorna_zero_quando_conversao_tem_sucesso(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_retorna_zero_quando_conversao_tem_sucesso(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     class FakeConverter:
         def convert(
             self,
@@ -81,7 +64,9 @@ def test_main_retorna_zero_quando_conversao_tem_sucesso(monkeypatch: pytest.Monk
     assert cli.main(["arquivo.pdf", "2", "5", "--output-dir", "saida"]) == 0
 
 
-def test_main_retorna_um_quando_ha_erro_esperado(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_retorna_um_quando_ha_erro_esperado(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     class FakeConverter:
         def convert(
             self,
@@ -98,7 +83,28 @@ def test_main_retorna_um_quando_ha_erro_esperado(monkeypatch: pytest.MonkeyPatch
     assert cli.main(["arquivo.pdf"]) == 1
 
 
-def test_configure_logging_define_formato_basico(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_retorna_um_quando_triagem_bloqueia_pdf(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FakeConverter:
+        def convert(
+            self,
+            pdf_path: Path,
+            output_dir: Path,
+            start_page: int | None = None,
+            end_page: int | None = None,
+            check_security: bool = True,
+        ) -> Path:
+            raise PdfSecurityError("bloqueado")
+
+    monkeypatch.setattr(cli, "build_converter", lambda: FakeConverter())
+
+    assert cli.main(["arquivo.pdf"]) == 1
+
+
+def test_configure_logging_define_formato_basico(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     chamadas: dict[str, object] = {}
 
     def fake_basic_config(**kwargs: object) -> None:

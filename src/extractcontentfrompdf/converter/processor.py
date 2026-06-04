@@ -5,13 +5,13 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from extractcontentfrompdf.file_repository import MarkdownFileRepository
 from extractcontentfrompdf.markdown_builder import MarkdownDocumentBuilder
 from extractcontentfrompdf.models import MarkdownDocument, PdfDocument
 from extractcontentfrompdf.pdf_extractor import PdfTextExtractor
 from extractcontentfrompdf.security.policy import PdfSecurityPolicy
 from extractcontentfrompdf.security.models import PdfSecurityReport
 from extractcontentfrompdf.security.scanner import PdfSecurityScanner
+from extractcontentfrompdf.validation import PdfSourceValidator
 
 
 class PdfDocumentProcessor:
@@ -20,16 +20,16 @@ class PdfDocumentProcessor:
     def __init__(
         self,
         extractor: PdfTextExtractor,
-        markdown_builder: MarkdownDocumentBuilder,
-        repository: MarkdownFileRepository,
+        source_validator: PdfSourceValidator,
         security_scanner: PdfSecurityScanner,
         security_policy: PdfSecurityPolicy,
+        markdown_builder: MarkdownDocumentBuilder,
     ) -> None:
         self._extractor = extractor
-        self._markdown_builder = markdown_builder
-        self._repository = repository
+        self._source_validator = source_validator
         self._security_scanner = security_scanner
         self._security_policy = security_policy
+        self._markdown_builder = markdown_builder
 
     def process(
         self,
@@ -44,7 +44,7 @@ class PdfDocumentProcessor:
             start_page=start_page,
             end_page=end_page,
         )
-        self._repository.validate_source(document)
+        self._source_validator.validate(document)
 
         if check_security:
             security_report = self._security_scanner.scan(document)

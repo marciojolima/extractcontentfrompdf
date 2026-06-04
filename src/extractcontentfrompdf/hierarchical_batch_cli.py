@@ -7,7 +7,12 @@ import logging
 from pathlib import Path
 from typing import Sequence
 
-from extractcontentfrompdf.cli import OUTPUT_DIR, build_converter, configure_logging
+from extractcontentfrompdf.bootstrap import (
+    DEFAULT_OUTPUT_DIR,
+    build_converter,
+    configure_logging,
+)
+from extractcontentfrompdf.security.exceptions import PdfSecurityError
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -28,7 +33,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=OUTPUT_DIR,
+        default=DEFAULT_OUTPUT_DIR,
         help="Diretorio onde os arquivos Markdown serao salvos.",
     )
     parser.add_argument(
@@ -59,11 +64,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             output_dir=args.output_dir,
             check_security=args.check_security,
         )
-    except (FileNotFoundError, PermissionError, ValueError) as error:
+    except (FileNotFoundError, PermissionError, ValueError, PdfSecurityError) as error:
         logging.error("Falha ao preparar o processamento hierarquico: %s", error)
-        return 1
-    except Exception as error:  # pragma: no cover - protecao para PDFs inesperados
-        logging.error("Falha inesperada ao processar os PDFs hierarquicos: %s", error)
         return 1
 
     for output_path in output_paths:

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
 
 from extractcontentfrompdf.models import MarkdownDocument
 
@@ -23,17 +22,19 @@ class HierarchicalMarkdownDocumentBuilder:
 
     def build(self, root_node: DirectoryMarkdownNode) -> MarkdownDocument:
         """Monta o documento final preservando a hierarquia de diretorios."""
-        sections = [f"# {root_node.path.name}", ""]
-        sections.extend(self._build_directory_sections(root_node, heading_level=2))
-        content = "\n".join(section for section in sections if section is not None).strip() + "\n"
-        return MarkdownDocument(title=root_node.path.name, content=content)
+        content = self._build_directory_section(root_node, heading_level=1).strip() + "\n"
+        return MarkdownDocument(
+            title=root_node.path.name,
+            body=content.strip(),
+            content=content,
+        )
 
-    def _build_directory_sections(
+    def _build_directory_section(
         self,
         node: DirectoryMarkdownNode,
         heading_level: int,
-    ) -> list[str]:
-        """Monta recursivamente as secoes de um diretorio."""
+    ) -> str:
+        """Monta recursivamente a secao de um diretorio."""
         sections = [f"{'#' * heading_level} {node.path.name}", ""]
 
         for markdown_document in node.markdown_documents:
@@ -41,13 +42,13 @@ class HierarchicalMarkdownDocumentBuilder:
                 [
                     f"{'#' * (heading_level + 1)} {markdown_document.title}",
                     "",
-                    markdown_document.content.rstrip(),
+                    markdown_document.body,
                     "",
                 ]
             )
 
         for child_node in node.child_nodes:
-            sections.extend(self._build_directory_sections(child_node, heading_level + 1))
+            sections.append(self._build_directory_section(child_node, heading_level + 1))
             sections.append("")
 
-        return sections
+        return "\n".join(section.rstrip() for section in sections).strip()

@@ -7,64 +7,12 @@ import logging
 from pathlib import Path
 from typing import Sequence
 
-from extractcontentfrompdf.converter import (
-    PdfConversionService,
-    PdfDocumentProcessor,
-    PdfToMarkdownConverter,
-    HierarchicalMarkdownDocumentBuilder,
+from extractcontentfrompdf.bootstrap import (
+    DEFAULT_OUTPUT_DIR,
+    build_converter,
+    configure_logging,
 )
-from extractcontentfrompdf.converter.strategies import (
-    HierarchicalBatchConversionStrategy,
-    SingleFileConversionStrategy,
-)
-from extractcontentfrompdf.file_repository import MarkdownFileRepository
-from extractcontentfrompdf.markdown_builder import MarkdownDocumentBuilder
-from extractcontentfrompdf.pdf_extractor import PdfTextExtractor
-from extractcontentfrompdf.security.policy import PdfSecurityPolicy
-from extractcontentfrompdf.security.scanner import PdfSecurityScanner
-from extractcontentfrompdf.sanitizer import TextSanitizer
-
-INPUT_PDF_PATH = Path(
-    "data/in/Fase01/02 Fundamentos Python e ML/POSTECH - Aula 02 - Introdução a Python e Fundamentos da Programação.pdf"
-)
-OUTPUT_DIR = Path("data/out")
-
-
-def configure_logging() -> None:
-    """Configura o formato padrao de logs do script."""
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-
-
-def build_converter() -> PdfToMarkdownConverter:
-    """Monta as dependencias da aplicacao no ponto de composicao."""
-    sanitizer = TextSanitizer()
-    extractor = PdfTextExtractor(sanitizer=sanitizer)
-    markdown_builder = MarkdownDocumentBuilder()
-    repository = MarkdownFileRepository()
-    security_scanner = PdfSecurityScanner()
-    security_policy = PdfSecurityPolicy()
-    document_processor = PdfDocumentProcessor(
-        extractor=extractor,
-        markdown_builder=markdown_builder,
-        repository=repository,
-        security_scanner=security_scanner,
-        security_policy=security_policy,
-    )
-    single_file_strategy = SingleFileConversionStrategy(
-        document_processor=document_processor,
-        repository=repository,
-    )
-    hierarchical_batch_strategy = HierarchicalBatchConversionStrategy(
-        document_processor=document_processor,
-        repository=repository,
-        hierarchical_document_builder=HierarchicalMarkdownDocumentBuilder(),
-    )
-    return PdfToMarkdownConverter(
-        document_processor=document_processor,
-        single_file_strategy=single_file_strategy,
-        hierarchical_batch_strategy=hierarchical_batch_strategy,
-        service=PdfConversionService(),
-    )
+from extractcontentfrompdf.security.exceptions import PdfSecurityError
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -75,9 +23,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "pdf_path",
-        nargs="?",
         type=Path,
-        default=INPUT_PDF_PATH,
         help="Caminho do arquivo PDF de entrada.",
     )
     parser.add_argument(
@@ -97,7 +43,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=OUTPUT_DIR,
+        default=DEFAULT_OUTPUT_DIR,
         help="Diretorio onde o arquivo Markdown sera salvo.",
     )
     parser.add_argument(
@@ -130,11 +76,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             end_page=args.end_page,
             check_security=args.check_security,
         )
-    except (FileNotFoundError, PermissionError, ValueError) as error:
+    except (FileNotFoundError, PermissionError, ValueError, PdfSecurityError) as error:
         logging.error("Falha ao preparar o processamento: %s", error)
-        return 1
-    except Exception as error:  # pragma: no cover - protecao para PDFs inesperados
-        logging.error("Falha inesperada ao processar o PDF: %s", error)
         return 1
 
     logging.info("Markdown gerado com sucesso em: %s", output_path)
