@@ -32,6 +32,7 @@ def test_parse_args_usa_defaults_quando_nenhum_argumento_e_informado() -> None:
     assert args.start_page is None
     assert args.end_page is None
     assert args.output_dir == cli.OUTPUT_DIR
+    assert args.check_security is True
 
 
 def test_parse_args_le_pdf_e_intervalo_informados() -> None:
@@ -41,6 +42,14 @@ def test_parse_args_le_pdf_e_intervalo_informados() -> None:
     assert args.start_page == 2
     assert args.end_page == 5
     assert args.output_dir == Path("saida")
+    assert args.check_security is True
+
+
+def test_parse_args_permite_desabilitar_triagem() -> None:
+    args = cli.parse_args(["arquivo.pdf", "--no-check-security"])
+
+    assert args.pdf_path == Path("arquivo.pdf")
+    assert args.check_security is False
 
 
 def test_main_retorna_zero_quando_conversao_tem_sucesso(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -51,11 +60,13 @@ def test_main_retorna_zero_quando_conversao_tem_sucesso(monkeypatch: pytest.Monk
             output_dir: Path,
             start_page: int | None = None,
             end_page: int | None = None,
+            check_security: bool = True,
         ) -> Path:
             assert pdf_path == Path("arquivo.pdf")
             assert output_dir == Path("saida")
             assert start_page == 2
             assert end_page == 5
+            assert check_security is True
             return output_dir / "arquivo.md"
 
     monkeypatch.setattr(cli, "build_converter", lambda: FakeConverter())
@@ -71,6 +82,7 @@ def test_main_retorna_um_quando_ha_erro_esperado(monkeypatch: pytest.MonkeyPatch
             output_dir: Path,
             start_page: int | None = None,
             end_page: int | None = None,
+            check_security: bool = True,
         ) -> Path:
             raise FileNotFoundError("nao encontrado")
 
@@ -90,3 +102,23 @@ def test_configure_logging_define_formato_basico(monkeypatch: pytest.MonkeyPatch
     cli.configure_logging()
 
     assert chamadas == {"level": logging.INFO, "format": "%(levelname)s: %(message)s"}
+
+
+def test_main_repassa_parametro_para_ignorar_triagem(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FakeConverter:
+        def convert(
+            self,
+            pdf_path: Path,
+            output_dir: Path,
+            start_page: int | None = None,
+            end_page: int | None = None,
+            check_security: bool = True,
+        ) -> Path:
+            assert check_security is False
+            return output_dir / "arquivo.md"
+
+    monkeypatch.setattr(cli, "build_converter", lambda: FakeConverter())
+
+    assert cli.main(["arquivo.pdf", "--no-check-security", "--output-dir", "saida"]) == 0

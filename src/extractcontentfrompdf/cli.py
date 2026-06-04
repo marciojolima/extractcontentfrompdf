@@ -76,6 +76,19 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=OUTPUT_DIR,
         help="Diretorio onde o arquivo Markdown sera salvo.",
     )
+    parser.add_argument(
+        "--check-security",
+        dest="check_security",
+        action="store_true",
+        default=True,
+        help="Executa a triagem de seguranca do PDF antes da extracao.",
+    )
+    parser.add_argument(
+        "--no-check-security",
+        dest="check_security",
+        action="store_false",
+        help="Ignora a triagem de seguranca do PDF antes da extracao.",
+    )
     return parser.parse_args(argv)
 
 
@@ -91,6 +104,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.output_dir,
             start_page=args.start_page,
             end_page=args.end_page,
+            check_security=args.check_security,
         )
     except (FileNotFoundError, PermissionError, ValueError) as error:
         logging.error("Falha ao preparar o processamento: %s", error)

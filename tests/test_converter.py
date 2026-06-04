@@ -52,6 +52,41 @@ def test_convert_orquestra_fluxo_entre_dependencias() -> None:
     assert resultado == output_dir / "entrada.md"
 
 
+def test_convert_ignora_triagem_quando_parametro_esta_desabilitado() -> None:
+    extractor = Mock()
+    markdown_builder = Mock()
+    repository = Mock()
+    security_scanner = Mock()
+    security_policy = Mock()
+    converter = PdfToMarkdownConverter(
+        extractor=extractor,
+        markdown_builder=markdown_builder,
+        repository=repository,
+        security_scanner=security_scanner,
+        security_policy=security_policy,
+    )
+    repository.save.return_value = Path("saida/entrada.md")
+    extractor.extract.return_value = ExtractionResult(
+        total_pages=1,
+        processed_pages=1,
+        content="conteudo",
+    )
+    markdown_builder.build.return_value = MarkdownDocument(
+        title="entrada",
+        content="# entrada\n",
+    )
+
+    resultado = converter.convert(
+        Path("entrada.pdf"),
+        Path("saida"),
+        check_security=False,
+    )
+
+    security_scanner.scan.assert_not_called()
+    security_policy.enforce.assert_not_called()
+    assert resultado == Path("saida/entrada.md")
+
+
 def test_convert_registra_log_quando_triagem_esta_limpa(
     caplog,
 ) -> None:
@@ -123,5 +158,6 @@ def test_convert_registra_log_quando_triagem_encontra_risco(
     with caplog.at_level(logging.WARNING):
         converter.convert(Path("entrada.pdf"), Path("saida"))
 
-    assert "Triagem de seguranca encontrou risco em entrada.pdf" in caplog.text
-    assert "codigo JavaScript embutido" in caplog.text
+    assert "Triagem de seguranca encontrou sinais bloqueantes em entrada.pdf" in caplog.text
+    assert "Bloqueio preventivo por regra conservadora" in caplog.text
+    assert "[javascript] codigo JavaScript embutido" in caplog.text

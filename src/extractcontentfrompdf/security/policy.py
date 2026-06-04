@@ -20,5 +20,8 @@ class PdfSecurityPolicy:
 
         reasons = "; ".join(blocking_issues)
         raise PdfSecurityError(
-            f"PDF bloqueado na triagem de seguranca ({document.name}): {reasons}"
+            "PDF bloqueado por regra conservadora da triagem de seguranca "
+            f"({document.name}). Sinais detectados: {reasons}. "
+            "Se voce confiar na origem do arquivo, rode novamente com "
+            "--no-check-security para ignorar essa etapa."
         )

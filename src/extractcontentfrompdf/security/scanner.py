@@ -26,11 +26,12 @@ class PdfSecurityScanner:
                 )
             )
 
-        if self._has_open_action(catalog):
+        open_action_description = self._describe_open_action(catalog)
+        if open_action_description is not None:
             issues.append(
                 PdfSecurityIssue(
                     code="open_action",
-                    description="acao automatica ao abrir o arquivo",
+                    description=open_action_description,
                     blocking=True,
                 )
             )
@@ -55,11 +56,22 @@ class PdfSecurityScanner:
 
         return PdfSecurityReport(issues=tuple(issues))
 
-    def _has_open_action(self, catalog: object) -> bool:
-        """Detecta a presenca de acao automatica disparada na abertura."""
-        return self._contains_key(catalog, "/OpenAction") or self._contains_key(
-            catalog, "/AA"
-        )
+    def _describe_open_action(self, catalog: object) -> str | None:
+        """Descreve a acao automatica encontrada ao abrir o PDF."""
+        open_action = self._safe_get(catalog, "/OpenAction")
+        if open_action is not None:
+            action_type = self._safe_get(open_action, "/S")
+            if action_type is not None:
+                return (
+                    "acao automatica ao abrir o arquivo "
+                    f"(/OpenAction, tipo: {action_type})"
+                )
+            return "acao automatica ao abrir o arquivo (/OpenAction)"
+
+        if self._contains_key(catalog, "/AA"):
+            return "acao automatica adicional no catalogo do PDF (/AA)"
+
+        return None
 
     def _has_javascript(self, catalog: object) -> bool:
         """Procura apenas marcadores conhecidos de JavaScript no catalogo."""

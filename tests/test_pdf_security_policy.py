@@ -27,5 +27,8 @@ def test_enforce_bloqueia_quando_existe_issue_bloqueante() -> None:
         )
     )
 
-    with pytest.raises(PdfSecurityError, match="codigo JavaScript embutido"):
+    with pytest.raises(
+        PdfSecurityError,
+        match="regra conservadora.*codigo JavaScript embutido.*--no-check-security",
+    ):
         policy.enforce(PdfDocument(path=Path("suspeito.pdf")), report)

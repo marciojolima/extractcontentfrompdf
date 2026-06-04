@@ -37,6 +37,7 @@ class PdfToMarkdownConverter:
         output_dir: Path,
         start_page: int | None = None,
         end_page: int | None = None,
+        check_security: bool = True,
     ) -> Path:
         """Executa o fluxo completo de processamento para um unico PDF."""
         document = PdfDocument(
@@ -46,9 +47,15 @@ class PdfToMarkdownConverter:
         )
         self._repository.validate_source(document)
         self._repository.ensure_output_directory(output_dir)
-        security_report = self._security_scanner.scan(document)
-        self._log_security_report(document, security_report)
-        self._security_policy.enforce(document, security_report)
+        if check_security:
+            security_report = self._security_scanner.scan(document)
+            self._log_security_report(document, security_report)
+            self._security_policy.enforce(document, security_report)
+        else:
+            logging.info(
+                "Triagem de seguranca ignorada por parametro para %s",
+                document.name,
+            )
 
         extraction_result = self._extractor.extract(document)
         markdown_document = self._markdown_builder.build(document, extraction_result)
@@ -64,17 +71,22 @@ class PdfToMarkdownConverter:
             logging.info("Triagem de seguranca limpa para %s", document.name)
             return
 
-        reasons = ", ".join(issue.description for issue in report.issues)
+        reasons = ", ".join(
+            f"[{issue.code}] {issue.description}"
+            for issue in report.issues
+        )
         if report.has_blocking_issues:
             logging.warning(
-                "Triagem de seguranca encontrou risco em %s: %s",
+                "Triagem de seguranca encontrou sinais bloqueantes em %s. "
+                "Bloqueio preventivo por regra conservadora. Detalhes: %s",
                 document.name,
                 reasons,
             )
             return
 
         logging.info(
-            "Triagem de seguranca encontrou sinais nao bloqueantes em %s: %s",
+            "Triagem de seguranca encontrou sinais nao bloqueantes em %s. "
+            "Detalhes: %s",
             document.name,
             reasons,
         )
