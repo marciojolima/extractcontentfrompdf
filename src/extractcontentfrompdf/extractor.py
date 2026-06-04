@@ -9,7 +9,7 @@ from pathlib import Path
 import pdfplumber
 
 ARQUIVO_PDF_ENTRADA = Path(
-    "data/in/Fase01/00 Intro/Pos_Tech - Cap Projeto - Fase1- Machine Learning Engineering.pdf"
+    "data/in/Fase01/02 Fundamentos Python e ML/POSTECH - Aula 02 - Introdução a Python e Fundamentos da Programação.pdf"
 )
 DIRETORIO_SAIDA = Path("data/out")
 
@@ -32,10 +32,26 @@ def garantir_diretorios(caminho_pdf: Path, diretorio_saida: Path) -> None:
 
 def sanitizar_texto(texto: str) -> str:
     """Remove ruidos comuns de extracao e enxuga espacos e quebras excessivas."""
-    texto_limpo = texto.replace("\x00", "")
-    texto_limpo = re.sub(r"[\ud800-\udfff]", "", texto_limpo)
-    texto_limpo = re.sub(r"[^\S\r\n]+", " ", texto_limpo)
-    texto_limpo = re.sub(r"\n{3,}", "\n\n", texto_limpo)
+    caractere_nulo = "\x00"
+    padrao_surrogates_invalidos = r"[\ud800-\udfff]"
+    padrao_espacos_horizontais = r"[^\S\r\n]+"
+    padrao_quebras_em_excesso = r"\n{3,}"
+
+    # Remove bytes nulos, comuns em texto extraido de PDFs com codificacao inconsistente.
+    texto_sem_nulos = texto.replace(caractere_nulo, "")
+
+    # Descarta code points surrogate isolados, que podem quebrar serializacao e exibicao.
+    texto_sem_surrogates = re.sub(padrao_surrogates_invalidos, "", texto_sem_nulos)
+
+    # Normaliza sequencias de espacos e tabs sem mexer nas quebras de linha.
+    texto_com_espacos_normalizados = re.sub(
+        padrao_espacos_horizontais, " ", texto_sem_surrogates
+    )
+
+    # Reduz blocos muito grandes de linhas em branco para no maximo uma linha vazia.
+    texto_limpo = re.sub(
+        padrao_quebras_em_excesso, "\n\n", texto_com_espacos_normalizados
+    )
 
     linhas = [linha.strip() for linha in texto_limpo.splitlines()]
     return "\n".join(linhas).strip()
