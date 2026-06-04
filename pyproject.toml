@@ -15,11 +15,12 @@ extract-pdf = "extractcontentfrompdf.cli:main"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.3"
+pytest-cov = "^7.1.0"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = "-ra"
+addopts = "-ra --cov=extractcontentfrompdf --cov-report=term-missing --cov-report=html"
 
 [build-system]
 requires = ["poetry-core>=1.9.0"]

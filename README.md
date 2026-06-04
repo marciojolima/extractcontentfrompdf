@@ -18,6 +18,8 @@ poetry install
 poetry run pytest
 ```
 
+Esse comando tambem gera o relatorio de cobertura em HTML no diretorio `htmlcov/`.
+
 ### Escopo inicial recomendado
 
 Os testes unitarios foram preparados para focar apenas metodos publicos:
