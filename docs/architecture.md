@@ -62,5 +62,5 @@ Esses componentes lidam com bibliotecas externas e filesystem.
 
 - Validacoes de entrada ficam fora do repositório.
 - O builder de Markdown individual gera um `body` reutilizavel para consolidacoes.
-- O modo hierarquico ignora subarvores vazias e falha apenas quando a raiz inteira nao possui PDFs.
+- O modo batch ignora subarvores vazias e falha apenas quando a raiz inteira nao possui PDFs.
 - Excecoes genericas nao devem ser engolidas nos entrypoints.

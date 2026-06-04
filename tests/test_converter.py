@@ -8,7 +8,7 @@ from extractcontentfrompdf.converter import (
     PdfToMarkdownConverter,
 )
 from extractcontentfrompdf.converter.strategies import (
-    HierarchicalBatchConversionStrategy,
+    BatchConversionStrategy,
     SingleFileConversionStrategy,
 )
 from extractcontentfrompdf.models import ExtractionResult, MarkdownDocument
@@ -43,7 +43,7 @@ def _make_converter() -> tuple[
             document_processor=document_processor,
             repository=repository,
         ),
-        hierarchical_batch_strategy=HierarchicalBatchConversionStrategy(
+        batch_strategy=BatchConversionStrategy(
             document_processor=document_processor,
             repository=repository,
             hierarchical_document_builder=HierarchicalMarkdownDocumentBuilder(),
@@ -238,7 +238,7 @@ def test_convert_document_gera_markdown_sem_persistir() -> None:
     assert resultado == markdown_document
 
 
-def test_convert_hierarchical_ignora_subdiretorios_vazios(tmp_path: Path) -> None:
+def test_convert_batch_ignora_subdiretorios_vazios(tmp_path: Path) -> None:
     (
         converter,
         extractor,
@@ -266,7 +266,7 @@ def test_convert_hierarchical_ignora_subdiretorios_vazios(tmp_path: Path) -> Non
     empty_child.mkdir()
     (root_dir / "aula1.pdf").write_text("fake", encoding="utf-8")
 
-    output_paths = converter.convert_hierarchical(
+    output_paths = converter.convert_batch(
         root_dirs=[root_dir],
         output_dir=Path("saida"),
     )
@@ -277,7 +277,7 @@ def test_convert_hierarchical_ignora_subdiretorios_vazios(tmp_path: Path) -> Non
     assert repository.save.call_count == 1
 
 
-def test_convert_hierarchical_falha_quando_raiz_nao_tem_pdfs(tmp_path: Path) -> None:
+def test_convert_batch_falha_quando_raiz_nao_tem_pdfs(tmp_path: Path) -> None:
     (
         converter,
         _extractor,
@@ -291,7 +291,7 @@ def test_convert_hierarchical_falha_quando_raiz_nao_tem_pdfs(tmp_path: Path) -> 
     (root_dir / "subdir").mkdir(parents=True)
 
     try:
-        converter.convert_hierarchical(
+        converter.convert_batch(
             root_dirs=[root_dir],
             output_dir=Path("saida"),
         )

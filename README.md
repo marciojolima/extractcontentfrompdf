@@ -48,10 +48,10 @@ Conversão de um único PDF com intervalo de páginas:
 poetry run extract-pdf caminho/arquivo.pdf 1 10
 ```
 
-Conversão hierárquica de uma ou mais pastas raiz:
+Conversão em batch de uma ou mais pastas raiz:
 
 ```bash
-poetry run extract-pdf-hierarchical data/in/Fase01 data/in/Fase02
+poetry run extract-pdf-batch data/in/Fase01 data/in/Fase02
 ```
 
 Por padrão, os arquivos Markdown são gerados em `data/out`.

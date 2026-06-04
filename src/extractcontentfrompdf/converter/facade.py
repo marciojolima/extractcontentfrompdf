@@ -7,16 +7,14 @@ from typing import Sequence
 
 from extractcontentfrompdf.converter.processor import PdfDocumentProcessor
 from extractcontentfrompdf.converter.requests import (
-    HierarchicalBatchConversionRequest,
+    BatchConversionRequest,
     SingleFileConversionRequest,
 )
-from extractcontentfrompdf.models import MarkdownDocument
-from extractcontentfrompdf.converter.strategies.hierarchical_batch import (
-    HierarchicalBatchConversionStrategy,
-)
+from extractcontentfrompdf.converter.strategies.batch import BatchConversionStrategy
 from extractcontentfrompdf.converter.strategies.single_file import (
     SingleFileConversionStrategy,
 )
+from extractcontentfrompdf.models import MarkdownDocument
 
 
 class PdfToMarkdownConverter:
@@ -26,11 +24,11 @@ class PdfToMarkdownConverter:
         self,
         document_processor: PdfDocumentProcessor,
         single_file_strategy: SingleFileConversionStrategy,
-        hierarchical_batch_strategy: HierarchicalBatchConversionStrategy,
+        batch_strategy: BatchConversionStrategy,
     ) -> None:
         self._document_processor = document_processor
         self._single_file_strategy = single_file_strategy
-        self._hierarchical_batch_strategy = hierarchical_batch_strategy
+        self._batch_strategy = batch_strategy
 
     def convert(
         self,
@@ -65,16 +63,16 @@ class PdfToMarkdownConverter:
             check_security=check_security,
         )
 
-    def convert_hierarchical(
+    def convert_batch(
         self,
         root_dirs: Sequence[Path],
         output_dir: Path,
         check_security: bool = True,
     ) -> list[Path]:
         """Processa uma ou mais arvores e gera um Markdown por raiz informada."""
-        request = HierarchicalBatchConversionRequest(
+        request = BatchConversionRequest(
             root_dirs=tuple(root_dirs),
             output_dir=output_dir,
             check_security=check_security,
         )
-        return self._hierarchical_batch_strategy.execute(request)
+        return self._batch_strategy.execute(request)

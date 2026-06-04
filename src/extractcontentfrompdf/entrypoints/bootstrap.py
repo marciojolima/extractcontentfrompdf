@@ -11,7 +11,7 @@ from extractcontentfrompdf.converter import (
     PdfToMarkdownConverter,
 )
 from extractcontentfrompdf.converter.strategies import (
-    HierarchicalBatchConversionStrategy,
+    BatchConversionStrategy,
     SingleFileConversionStrategy,
 )
 from extractcontentfrompdf.file_repository import MarkdownFileRepository
@@ -52,7 +52,7 @@ def build_converter() -> PdfToMarkdownConverter:
             document_processor=document_processor,
             repository=repository,
         ),
-        hierarchical_batch_strategy=HierarchicalBatchConversionStrategy(
+        batch_strategy=BatchConversionStrategy(
             document_processor=document_processor,
             repository=repository,
             hierarchical_document_builder=HierarchicalMarkdownDocumentBuilder(),

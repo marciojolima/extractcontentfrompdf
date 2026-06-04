@@ -15,11 +15,11 @@ def test_parse_args_le_varias_raizes_para_processamento_hierarquico() -> None:
     assert args.check_security is False
 
 
-def test_main_retorna_zero_quando_conversao_hierarquica_tem_sucesso(
+def test_main_retorna_zero_quando_conversao_em_batch_tem_sucesso(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class FakeConverter:
-        def convert_hierarchical(
+        def convert_batch(
             self,
             root_dirs: list[Path],
             output_dir: Path,
@@ -50,7 +50,7 @@ def test_main_retorna_um_quando_ha_erro_esperado(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class FakeConverter:
-        def convert_hierarchical(
+        def convert_batch(
             self,
             root_dirs: list[Path],
             output_dir: Path,

@@ -16,9 +16,9 @@ from extractcontentfrompdf.security.exceptions import PdfSecurityError
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    """Le os argumentos da CLI para processamento hierarquico."""
+    """Le os argumentos da CLI para processamento em batch."""
     parser = argparse.ArgumentParser(
-        prog="extract-pdf-hierarchical",
+        prog="extract-pdf-batch",
         description=(
             "Extrai texto de PDFs preservando a hierarquia de um ou mais "
             "diretorios raiz e gera um Markdown por raiz informada."
@@ -59,15 +59,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     converter = build_converter()
 
     try:
-        output_paths = converter.convert_hierarchical(
+        output_paths = converter.convert_batch(
             root_dirs=args.root_dirs,
             output_dir=args.output_dir,
             check_security=args.check_security,
         )
     except (FileNotFoundError, PermissionError, ValueError, PdfSecurityError) as error:
-        logging.error("Falha ao preparar o processamento hierarquico: %s", error)
+        logging.error("Falha ao preparar o processamento em batch: %s", error)
         return 1
 
     for output_path in output_paths:
-        logging.info("Markdown hierarquico gerado com sucesso em: %s", output_path)
+        logging.info("Markdown em batch gerado com sucesso em: %s", output_path)
     return 0

@@ -1,4 +1,4 @@
-"""Estrategia para consolidacao hierarquica de uma ou mais arvores."""
+"""Estrategia para consolidacao em batch de uma ou mais arvores."""
 
 from __future__ import annotations
 
@@ -9,12 +9,12 @@ from extractcontentfrompdf.converter.hierarchical_document_builder import (
     HierarchicalMarkdownDocumentBuilder,
 )
 from extractcontentfrompdf.converter.processor import PdfDocumentProcessor
-from extractcontentfrompdf.converter.requests import HierarchicalBatchConversionRequest
+from extractcontentfrompdf.converter.requests import BatchConversionRequest
 from extractcontentfrompdf.file_repository import MarkdownFileRepository
 
 
-class HierarchicalBatchConversionStrategy:
-    """Processa diretorios raiz preservando a hierarquia na saida Markdown."""
+class BatchConversionStrategy:
+    """Processa diretorios raiz em batch preservando a hierarquia na saida."""
 
     def __init__(
         self,
@@ -26,11 +26,11 @@ class HierarchicalBatchConversionStrategy:
         self._repository = repository
         self._hierarchical_document_builder = hierarchical_document_builder
 
-    def execute(self, request: HierarchicalBatchConversionRequest) -> list[Path]:
-        """Executa a conversao hierarquica para cada raiz informada."""
+    def execute(self, request: BatchConversionRequest) -> list[Path]:
+        """Executa a conversao em batch para cada raiz informada."""
         if not request.root_dirs:
             raise ValueError(
-                "Nenhum diretorio raiz foi informado para o processamento hierarquico."
+                "Nenhum diretorio raiz foi informado para o processamento em batch."
             )
 
         self._repository.ensure_output_directory(request.output_dir)

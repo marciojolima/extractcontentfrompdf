@@ -7,13 +7,13 @@ from extractcontentfrompdf.converter.hierarchical_document_builder import (
 )
 from extractcontentfrompdf.converter.processor import PdfDocumentProcessor
 from extractcontentfrompdf.converter.requests import (
-    HierarchicalBatchConversionRequest,
+    BatchConversionRequest,
     SingleFileConversionRequest,
 )
 
 __all__ = [
+    "BatchConversionRequest",
     "DirectoryMarkdownNode",
-    "HierarchicalBatchConversionRequest",
     "HierarchicalMarkdownDocumentBuilder",
     "PdfDocumentProcessor",
     "PdfToMarkdownConverter",

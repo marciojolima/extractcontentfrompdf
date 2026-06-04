@@ -18,7 +18,7 @@ class SingleFileConversionRequest:
 
 
 @dataclass(frozen=True, slots=True)
-class HierarchicalBatchConversionRequest:
+class BatchConversionRequest:
     """Parametros necessarios para converter uma ou mais arvores de diretorios."""
 
     root_dirs: tuple[Path, ...]
