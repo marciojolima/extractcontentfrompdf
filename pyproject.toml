@@ -9,6 +9,7 @@ packages = [{ include = "extractcontentfrompdf", from = "src" }]
 [tool.poetry.dependencies]
 python = ">=3.13,<4.0"
 pdfplumber = "^0.11.7"
+pypdf = "^6.12.2"
 
 [tool.poetry.scripts]
 extract-pdf = "extractcontentfrompdf.cli:main"

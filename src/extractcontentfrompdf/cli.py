@@ -9,6 +9,8 @@ from extractcontentfrompdf.converter import PdfToMarkdownConverter
 from extractcontentfrompdf.file_repository import MarkdownFileRepository
 from extractcontentfrompdf.markdown_builder import MarkdownDocumentBuilder
 from extractcontentfrompdf.pdf_extractor import PdfTextExtractor
+from extractcontentfrompdf.security.policy import PdfSecurityPolicy
+from extractcontentfrompdf.security.scanner import PdfSecurityScanner
 from extractcontentfrompdf.sanitizer import TextSanitizer
 
 INPUT_PDF_PATH = Path(
@@ -28,10 +30,14 @@ def build_converter() -> PdfToMarkdownConverter:
     extractor = PdfTextExtractor(sanitizer=sanitizer)
     markdown_builder = MarkdownDocumentBuilder()
     repository = MarkdownFileRepository()
+    security_scanner = PdfSecurityScanner()
+    security_policy = PdfSecurityPolicy()
     return PdfToMarkdownConverter(
         extractor=extractor,
         markdown_builder=markdown_builder,
         repository=repository,
+        security_scanner=security_scanner,
+        security_policy=security_policy,
     )
 
 
