@@ -8,14 +8,12 @@ from pathlib import Path
 from typing import Sequence
 
 from extractcontentfrompdf.converter import (
-    BatchMarkdownDocumentBuilder,
     PdfConversionService,
     PdfDocumentProcessor,
     PdfToMarkdownConverter,
     HierarchicalMarkdownDocumentBuilder,
 )
 from extractcontentfrompdf.converter.strategies import (
-    BatchConversionStrategy,
     HierarchicalBatchConversionStrategy,
     SingleFileConversionStrategy,
 )
@@ -56,11 +54,6 @@ def build_converter() -> PdfToMarkdownConverter:
         document_processor=document_processor,
         repository=repository,
     )
-    batch_strategy = BatchConversionStrategy(
-        document_processor=document_processor,
-        repository=repository,
-        batch_document_builder=BatchMarkdownDocumentBuilder(),
-    )
     hierarchical_batch_strategy = HierarchicalBatchConversionStrategy(
         document_processor=document_processor,
         repository=repository,
@@ -69,7 +62,6 @@ def build_converter() -> PdfToMarkdownConverter:
     return PdfToMarkdownConverter(
         document_processor=document_processor,
         single_file_strategy=single_file_strategy,
-        batch_strategy=batch_strategy,
         hierarchical_batch_strategy=hierarchical_batch_strategy,
         service=PdfConversionService(),
     )

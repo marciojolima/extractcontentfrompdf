@@ -3,14 +3,12 @@ from pathlib import Path
 from unittest.mock import Mock
 
 from extractcontentfrompdf.converter import (
-    BatchMarkdownDocumentBuilder,
     HierarchicalMarkdownDocumentBuilder,
     PdfConversionService,
     PdfDocumentProcessor,
     PdfToMarkdownConverter,
 )
 from extractcontentfrompdf.converter.strategies import (
-    BatchConversionStrategy,
     HierarchicalBatchConversionStrategy,
     SingleFileConversionStrategy,
 )
@@ -36,11 +34,6 @@ def test_convert_orquestra_fluxo_entre_dependencias() -> None:
         single_file_strategy=SingleFileConversionStrategy(
             document_processor=document_processor,
             repository=repository,
-        ),
-        batch_strategy=BatchConversionStrategy(
-            document_processor=document_processor,
-            repository=repository,
-            batch_document_builder=BatchMarkdownDocumentBuilder(),
         ),
         hierarchical_batch_strategy=HierarchicalBatchConversionStrategy(
             document_processor=document_processor,
@@ -100,11 +93,6 @@ def test_convert_ignora_triagem_quando_parametro_esta_desabilitado() -> None:
             document_processor=document_processor,
             repository=repository,
         ),
-        batch_strategy=BatchConversionStrategy(
-            document_processor=document_processor,
-            repository=repository,
-            batch_document_builder=BatchMarkdownDocumentBuilder(),
-        ),
         hierarchical_batch_strategy=HierarchicalBatchConversionStrategy(
             document_processor=document_processor,
             repository=repository,
@@ -155,11 +143,6 @@ def test_convert_registra_log_quando_triagem_esta_limpa(
             document_processor=document_processor,
             repository=repository,
         ),
-        batch_strategy=BatchConversionStrategy(
-            document_processor=document_processor,
-            repository=repository,
-            batch_document_builder=BatchMarkdownDocumentBuilder(),
-        ),
         hierarchical_batch_strategy=HierarchicalBatchConversionStrategy(
             document_processor=document_processor,
             repository=repository,
@@ -205,11 +188,6 @@ def test_convert_registra_log_quando_triagem_encontra_risco(
         single_file_strategy=SingleFileConversionStrategy(
             document_processor=document_processor,
             repository=repository,
-        ),
-        batch_strategy=BatchConversionStrategy(
-            document_processor=document_processor,
-            repository=repository,
-            batch_document_builder=BatchMarkdownDocumentBuilder(),
         ),
         hierarchical_batch_strategy=HierarchicalBatchConversionStrategy(
             document_processor=document_processor,
@@ -265,11 +243,6 @@ def test_convert_document_gera_markdown_sem_persistir() -> None:
             document_processor=document_processor,
             repository=repository,
         ),
-        batch_strategy=BatchConversionStrategy(
-            document_processor=document_processor,
-            repository=repository,
-            batch_document_builder=BatchMarkdownDocumentBuilder(),
-        ),
         hierarchical_batch_strategy=HierarchicalBatchConversionStrategy(
             document_processor=document_processor,
             repository=repository,
@@ -315,11 +288,6 @@ def test_convert_batch_consolida_varios_pdfs_em_um_unico_arquivo() -> None:
             document_processor=document_processor,
             repository=repository,
         ),
-        batch_strategy=BatchConversionStrategy(
-            document_processor=document_processor,
-            repository=repository,
-            batch_document_builder=BatchMarkdownDocumentBuilder(),
-        ),
         hierarchical_batch_strategy=HierarchicalBatchConversionStrategy(
             document_processor=document_processor,
             repository=repository,
@@ -347,11 +315,6 @@ def test_convert_hierarchical_gera_um_arquivo_por_raiz(tmp_path: Path) -> None:
         single_file_strategy=SingleFileConversionStrategy(
             document_processor=document_processor,
             repository=repository,
-        ),
-        batch_strategy=BatchConversionStrategy(
-            document_processor=document_processor,
-            repository=repository,
-            batch_document_builder=BatchMarkdownDocumentBuilder(),
         ),
         hierarchical_batch_strategy=HierarchicalBatchConversionStrategy(
             document_processor=document_processor,
@@ -386,62 +349,3 @@ def test_convert_hierarchical_gera_um_arquivo_por_raiz(tmp_path: Path) -> None:
     assert output_paths == [Path("saida/Fase01.md"), Path("saida/Fase02.md")]
     assert repository.ensure_output_directory.call_count == 1
     assert repository.save.call_count == 2
-
-
-def test_convert_batch_consolida_varios_pdfs_em_um_unico_arquivo() -> None:
-    extractor = Mock()
-    markdown_builder = Mock()
-    repository = Mock()
-    security_scanner = Mock()
-    security_policy = Mock()
-    document_processor = PdfDocumentProcessor(
-        extractor=extractor,
-        markdown_builder=markdown_builder,
-        repository=repository,
-        security_scanner=security_scanner,
-        security_policy=security_policy,
-    )
-    converter = PdfToMarkdownConverter(
-        document_processor=document_processor,
-        single_file_strategy=SingleFileConversionStrategy(
-            document_processor=document_processor,
-            repository=repository,
-        ),
-        batch_strategy=BatchConversionStrategy(
-            document_processor=document_processor,
-            repository=repository,
-            batch_document_builder=BatchMarkdownDocumentBuilder(),
-        ),
-        hierarchical_batch_strategy=HierarchicalBatchConversionStrategy(
-            document_processor=document_processor,
-            repository=repository,
-            hierarchical_document_builder=HierarchicalMarkdownDocumentBuilder(),
-        ),
-        service=PdfConversionService(),
-    )
-    repository.save.return_value = Path("saida/lote.md")
-    extractor.extract.side_effect = [
-        ExtractionResult(total_pages=1, processed_pages=1, content="conteudo A"),
-        ExtractionResult(total_pages=2, processed_pages=2, content="conteudo B"),
-    ]
-    markdown_builder.build.side_effect = [
-        MarkdownDocument(title="a", content="# a\n\nconteudo A\n"),
-        MarkdownDocument(title="b", content="# b\n\nconteudo B\n"),
-    ]
-    security_scanner.scan.return_value = PdfSecurityReport(issues=())
-
-    resultado = converter.convert_batch(
-        pdf_paths=[Path("a.pdf"), Path("b.pdf")],
-        output_dir=Path("saida"),
-        bundle_name="lote",
-    )
-
-    repository.ensure_output_directory.assert_called_once_with(Path("saida"))
-    repository.save.assert_called_once()
-    saved_document = repository.save.call_args.args[1]
-    assert saved_document.title == "lote"
-    assert "# lote" in saved_document.content
-    assert "**Arquivos processados:** 2" in saved_document.content
-    assert "# a" in saved_document.content
-    assert "# b" in saved_document.content
-    assert resultado == Path("saida/lote.md")

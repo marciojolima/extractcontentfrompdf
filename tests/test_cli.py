@@ -6,7 +6,6 @@ import pytest
 from extractcontentfrompdf import cli
 from extractcontentfrompdf.converter import PdfDocumentProcessor, PdfToMarkdownConverter
 from extractcontentfrompdf.converter.strategies import (
-    BatchConversionStrategy,
     HierarchicalBatchConversionStrategy,
     SingleFileConversionStrategy,
 )
@@ -30,7 +29,6 @@ def test_build_converter_monta_dependencias_esperadas() -> None:
     assert isinstance(converter._document_processor._security_scanner, PdfSecurityScanner)
     assert isinstance(converter._document_processor._security_policy, PdfSecurityPolicy)
     assert isinstance(converter._single_file_strategy, SingleFileConversionStrategy)
-    assert isinstance(converter._batch_strategy, BatchConversionStrategy)
     assert isinstance(converter._hierarchical_batch_strategy, HierarchicalBatchConversionStrategy)
 
 

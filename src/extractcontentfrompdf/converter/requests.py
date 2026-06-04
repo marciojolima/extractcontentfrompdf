@@ -18,16 +18,6 @@ class SingleFileConversionRequest:
 
 
 @dataclass(frozen=True, slots=True)
-class BatchConversionRequest:
-    """Parametros necessarios para converter um lote de PDFs."""
-
-    pdf_paths: tuple[Path, ...]
-    output_dir: Path
-    bundle_name: str
-    check_security: bool = True
-
-
-@dataclass(frozen=True, slots=True)
 class HierarchicalBatchConversionRequest:
     """Parametros necessarios para converter uma ou mais arvores de diretorios."""
 
