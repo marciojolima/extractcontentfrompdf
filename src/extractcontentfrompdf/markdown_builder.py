@@ -19,7 +19,8 @@ class MarkdownDocumentBuilder:
         sections = [
             f"# {document.stem}",
             "",
-            f"**Paginas processadas:** {extraction_result.page_count}",
+            f"**Paginas do PDF:** {extraction_result.total_pages}",
+            f"**Paginas processadas:** {extraction_result.processed_pages}",
             "",
         ]
 

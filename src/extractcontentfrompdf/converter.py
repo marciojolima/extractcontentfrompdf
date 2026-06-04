@@ -31,9 +31,19 @@ class PdfToMarkdownConverter:
         self._security_scanner = security_scanner
         self._security_policy = security_policy
 
-    def convert(self, pdf_path: Path, output_dir: Path) -> Path:
+    def convert(
+        self,
+        pdf_path: Path,
+        output_dir: Path,
+        start_page: int | None = None,
+        end_page: int | None = None,
+    ) -> Path:
         """Executa o fluxo completo de processamento para um unico PDF."""
-        document = PdfDocument(path=pdf_path)
+        document = PdfDocument(
+            path=pdf_path,
+            start_page=start_page,
+            end_page=end_page,
+        )
         self._repository.validate_source(document)
         self._repository.ensure_output_directory(output_dir)
         security_report = self._security_scanner.scan(document)

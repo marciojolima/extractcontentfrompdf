@@ -25,26 +25,58 @@ def test_build_converter_monta_dependencias_esperadas() -> None:
     assert isinstance(converter._security_policy, PdfSecurityPolicy)
 
 
+def test_parse_args_usa_defaults_quando_nenhum_argumento_e_informado() -> None:
+    args = cli.parse_args([])
+
+    assert args.pdf_path == cli.INPUT_PDF_PATH
+    assert args.start_page is None
+    assert args.end_page is None
+    assert args.output_dir == cli.OUTPUT_DIR
+
+
+def test_parse_args_le_pdf_e_intervalo_informados() -> None:
+    args = cli.parse_args(["arquivo.pdf", "2", "5", "--output-dir", "saida"])
+
+    assert args.pdf_path == Path("arquivo.pdf")
+    assert args.start_page == 2
+    assert args.end_page == 5
+    assert args.output_dir == Path("saida")
+
+
 def test_main_retorna_zero_quando_conversao_tem_sucesso(monkeypatch: pytest.MonkeyPatch) -> None:
     class FakeConverter:
-        def convert(self, pdf_path: Path, output_dir: Path) -> Path:
-            assert pdf_path == cli.INPUT_PDF_PATH
-            assert output_dir == cli.OUTPUT_DIR
+        def convert(
+            self,
+            pdf_path: Path,
+            output_dir: Path,
+            start_page: int | None = None,
+            end_page: int | None = None,
+        ) -> Path:
+            assert pdf_path == Path("arquivo.pdf")
+            assert output_dir == Path("saida")
+            assert start_page == 2
+            assert end_page == 5
             return output_dir / "arquivo.md"
 
     monkeypatch.setattr(cli, "build_converter", lambda: FakeConverter())
 
-    assert cli.main() == 0
+    assert cli.main(["arquivo.pdf", "2", "5", "--output-dir", "saida"]) == 0
 
 
 def test_main_retorna_um_quando_ha_erro_esperado(monkeypatch: pytest.MonkeyPatch) -> None:
     class FakeConverter:
-        def convert(self, pdf_path: Path, output_dir: Path) -> Path:
+        def convert(
+            self,
+            pdf_path: Path,
+            output_dir: Path,
+            start_page: int | None = None,
+            end_page: int | None = None,
+        ) -> Path:
             raise FileNotFoundError("nao encontrado")
 
     monkeypatch.setattr(cli, "build_converter", lambda: FakeConverter())
 
-    assert cli.main() == 1
+    assert cli.main(["arquivo.pdf"]) == 1
 
 
 def test_configure_logging_define_formato_basico(monkeypatch: pytest.MonkeyPatch) -> None:

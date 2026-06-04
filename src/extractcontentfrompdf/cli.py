@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import argparse
 import logging
 from pathlib import Path
+from typing import Sequence
 
 from extractcontentfrompdf.converter import PdfToMarkdownConverter
 from extractcontentfrompdf.file_repository import MarkdownFileRepository
@@ -41,13 +43,55 @@ def build_converter() -> PdfToMarkdownConverter:
     )
 
 
-def main() -> int:
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    """Le os argumentos da CLI para processamento de um unico PDF."""
+    parser = argparse.ArgumentParser(
+        prog="extract-pdf",
+        description="Extrai texto de um arquivo PDF e salva o resultado em Markdown.",
+    )
+    parser.add_argument(
+        "pdf_path",
+        nargs="?",
+        type=Path,
+        default=INPUT_PDF_PATH,
+        help="Caminho do arquivo PDF de entrada.",
+    )
+    parser.add_argument(
+        "start_page",
+        nargs="?",
+        type=int,
+        default=None,
+        help="Pagina inicial para extracao.",
+    )
+    parser.add_argument(
+        "end_page",
+        nargs="?",
+        type=int,
+        default=None,
+        help="Pagina final para extracao.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=OUTPUT_DIR,
+        help="Diretorio onde o arquivo Markdown sera salvo.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
     """Executa o fluxo principal da aplicacao."""
     configure_logging()
+    args = parse_args(argv)
     converter = build_converter()
 
     try:
-        output_path = converter.convert(INPUT_PDF_PATH, OUTPUT_DIR)
+        output_path = converter.convert(
+            args.pdf_path,
+            args.output_dir,
+            start_page=args.start_page,
+            end_page=args.end_page,
+        )
     except (FileNotFoundError, PermissionError, ValueError) as error:
         logging.error("Falha ao preparar o processamento: %s", error)
         return 1

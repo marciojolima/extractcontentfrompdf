@@ -22,7 +22,11 @@ def test_convert_orquestra_fluxo_entre_dependencias() -> None:
     )
     pdf_path = Path("entrada.pdf")
     output_dir = Path("saida")
-    extraction_result = ExtractionResult(page_count=2, content="conteudo")
+    extraction_result = ExtractionResult(
+        total_pages=5,
+        processed_pages=2,
+        content="conteudo",
+    )
     markdown_document = MarkdownDocument(title="entrada", content="# entrada\n")
     security_report = PdfSecurityReport(issues=())
     repository.save.return_value = output_dir / "entrada.md"
@@ -30,8 +34,14 @@ def test_convert_orquestra_fluxo_entre_dependencias() -> None:
     markdown_builder.build.return_value = markdown_document
     security_scanner.scan.return_value = security_report
 
-    resultado = converter.convert(pdf_path, output_dir)
+    resultado = converter.convert(pdf_path, output_dir, start_page=2, end_page=3)
 
+    document = repository.validate_source.call_args.args[0]
+    assert document == extractor.extract.call_args.args[0]
+    assert document == markdown_builder.build.call_args.args[0]
+    assert document.path == pdf_path
+    assert document.start_page == 2
+    assert document.end_page == 3
     repository.validate_source.assert_called_once()
     repository.ensure_output_directory.assert_called_once_with(output_dir)
     security_scanner.scan.assert_called_once()
@@ -58,7 +68,11 @@ def test_convert_registra_log_quando_triagem_esta_limpa(
         security_policy=security_policy,
     )
     repository.save.return_value = Path("saida/entrada.md")
-    extractor.extract.return_value = ExtractionResult(page_count=1, content="conteudo")
+    extractor.extract.return_value = ExtractionResult(
+        total_pages=1,
+        processed_pages=1,
+        content="conteudo",
+    )
     markdown_builder.build.return_value = MarkdownDocument(
         title="entrada",
         content="# entrada\n",
@@ -87,7 +101,11 @@ def test_convert_registra_log_quando_triagem_encontra_risco(
         security_policy=security_policy,
     )
     repository.save.return_value = Path("saida/entrada.md")
-    extractor.extract.return_value = ExtractionResult(page_count=1, content="conteudo")
+    extractor.extract.return_value = ExtractionResult(
+        total_pages=1,
+        processed_pages=1,
+        content="conteudo",
+    )
     markdown_builder.build.return_value = MarkdownDocument(
         title="entrada",
         content="# entrada\n",

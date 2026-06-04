@@ -21,9 +21,20 @@ class PdfTextExtractor:
         page_sections: list[str] = []
 
         with pdfplumber.open(document.path) as pdf:
-            page_count = len(pdf.pages)
+            total_pages = len(pdf.pages)
+            resolved_interval = document.resolve_page_interval(total_pages)
 
-            for page_number, page in enumerate(pdf.pages, start=1):
+            if resolved_interval is None:
+                return ExtractionResult(
+                    total_pages=0,
+                    processed_pages=0,
+                    content="",
+                )
+
+            start_page, end_page = resolved_interval
+
+            for page_number in range(start_page, end_page + 1):
+                page = pdf.pages[page_number - 1]
                 raw_text = page.extract_text() or ""
                 sanitized_text = self._sanitizer.sanitize(raw_text)
 
@@ -40,7 +51,11 @@ class PdfTextExtractor:
                 )
 
         content = "\n\n".join(page_sections).strip()
-        return ExtractionResult(page_count=page_count, content=content)
+        return ExtractionResult(
+            total_pages=total_pages,
+            processed_pages=end_page - start_page + 1,
+            content=content,
+        )
 
     def _build_page_section(self, page_number: int, content: str) -> str:
         """Monta a secao referente a uma pagina extraida."""
