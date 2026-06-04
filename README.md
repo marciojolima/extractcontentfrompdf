@@ -2,6 +2,22 @@
 
 Projeto em Python para extrair texto de PDFs nativos e salvar o resultado em Markdown.
 
+## Linha de comando
+
+### PDF individual
+
+```bash
+poetry run extract-pdf caminho/arquivo.pdf
+```
+
+### Lote de PDFs
+
+```bash
+poetry run extract-pdf-batch caminho/pasta-raiz
+```
+
+O comando em lote busca PDFs recursivamente dentro da pasta raiz informada e gera um unico arquivo Markdown com o nome desse diretorio.
+
 ## Testes unitarios
 
 O projeto usa `pytest` como dependencia de desenvolvimento.

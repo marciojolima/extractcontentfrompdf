@@ -13,6 +13,7 @@ pypdf = "^6.12.2"
 
 [tool.poetry.scripts]
 extract-pdf = "extractcontentfrompdf.cli:main"
+extract-pdf-batch = "extractcontentfrompdf.batch_cli:main"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.3"
