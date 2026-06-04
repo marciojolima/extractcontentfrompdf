@@ -2,6 +2,14 @@
 
 Projeto em Python para extrair texto de PDFs nativos e gerar arquivos Markdown simples, leves e prontos para consumo por fluxos de busca, RAG e LLMs.
 
+## Tecnologias Utilizadas
+
+![Python](https://img.shields.io/badge/Python-3.13-blue?style=for-the-badge&logo=python)
+![pdfplumber](https://img.shields.io/badge/pdfplumber-extração%20de%20texto-4B5563?style=for-the-badge)
+![PyPDF](https://img.shields.io/badge/PyPDF-triagem%20e%20leitura-B31B1B?style=for-the-badge)
+![Poetry](https://img.shields.io/badge/Poetry-gerenciamento-1E3A8A?style=for-the-badge&logo=poetry)
+![Pytest](https://img.shields.io/badge/Pytest-testes-0A9EDC?style=for-the-badge&logo=pytest)
+
 ## Objetivo de negócio
 
 O projeto existe para transformar documentos PDF em conteúdo textual mais fácil de armazenar, indexar e reutilizar em processos automatizados.
@@ -60,7 +68,6 @@ Também é possível desativar a triagem de segurança do PDF:
 poetry run extract-pdf caminho/arquivo.pdf --no-check-security
 ```
 
-## Documentação técnica
+## Documentação
 
-Detalhes técnicos e decisões de arquitetura estão em
-<a href="./docs/architecture.md">docs/architecture.md</a>.
+📚 [Arquitetura do projeto](docs/architecture.md)
