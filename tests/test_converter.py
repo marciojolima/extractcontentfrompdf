@@ -2,7 +2,16 @@ import logging
 from pathlib import Path
 from unittest.mock import Mock
 
-from extractcontentfrompdf.converter import PdfToMarkdownConverter
+from extractcontentfrompdf.converter import (
+    BatchMarkdownDocumentBuilder,
+    PdfConversionService,
+    PdfDocumentProcessor,
+    PdfToMarkdownConverter,
+)
+from extractcontentfrompdf.converter.strategies import (
+    BatchConversionStrategy,
+    SingleFileConversionStrategy,
+)
 from extractcontentfrompdf.models import ExtractionResult, MarkdownDocument
 from extractcontentfrompdf.security.models import PdfSecurityIssue, PdfSecurityReport
 
@@ -13,12 +22,25 @@ def test_convert_orquestra_fluxo_entre_dependencias() -> None:
     repository = Mock()
     security_scanner = Mock()
     security_policy = Mock()
-    converter = PdfToMarkdownConverter(
+    document_processor = PdfDocumentProcessor(
         extractor=extractor,
         markdown_builder=markdown_builder,
         repository=repository,
         security_scanner=security_scanner,
         security_policy=security_policy,
+    )
+    converter = PdfToMarkdownConverter(
+        document_processor=document_processor,
+        single_file_strategy=SingleFileConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+        ),
+        batch_strategy=BatchConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+            batch_document_builder=BatchMarkdownDocumentBuilder(),
+        ),
+        service=PdfConversionService(),
     )
     pdf_path = Path("entrada.pdf")
     output_dir = Path("saida")
@@ -58,12 +80,25 @@ def test_convert_ignora_triagem_quando_parametro_esta_desabilitado() -> None:
     repository = Mock()
     security_scanner = Mock()
     security_policy = Mock()
-    converter = PdfToMarkdownConverter(
+    document_processor = PdfDocumentProcessor(
         extractor=extractor,
         markdown_builder=markdown_builder,
         repository=repository,
         security_scanner=security_scanner,
         security_policy=security_policy,
+    )
+    converter = PdfToMarkdownConverter(
+        document_processor=document_processor,
+        single_file_strategy=SingleFileConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+        ),
+        batch_strategy=BatchConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+            batch_document_builder=BatchMarkdownDocumentBuilder(),
+        ),
+        service=PdfConversionService(),
     )
     repository.save.return_value = Path("saida/entrada.md")
     extractor.extract.return_value = ExtractionResult(
@@ -95,12 +130,25 @@ def test_convert_registra_log_quando_triagem_esta_limpa(
     repository = Mock()
     security_scanner = Mock()
     security_policy = Mock()
-    converter = PdfToMarkdownConverter(
+    document_processor = PdfDocumentProcessor(
         extractor=extractor,
         markdown_builder=markdown_builder,
         repository=repository,
         security_scanner=security_scanner,
         security_policy=security_policy,
+    )
+    converter = PdfToMarkdownConverter(
+        document_processor=document_processor,
+        single_file_strategy=SingleFileConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+        ),
+        batch_strategy=BatchConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+            batch_document_builder=BatchMarkdownDocumentBuilder(),
+        ),
+        service=PdfConversionService(),
     )
     repository.save.return_value = Path("saida/entrada.md")
     extractor.extract.return_value = ExtractionResult(
@@ -128,12 +176,25 @@ def test_convert_registra_log_quando_triagem_encontra_risco(
     repository = Mock()
     security_scanner = Mock()
     security_policy = Mock()
-    converter = PdfToMarkdownConverter(
+    document_processor = PdfDocumentProcessor(
         extractor=extractor,
         markdown_builder=markdown_builder,
         repository=repository,
         security_scanner=security_scanner,
         security_policy=security_policy,
+    )
+    converter = PdfToMarkdownConverter(
+        document_processor=document_processor,
+        single_file_strategy=SingleFileConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+        ),
+        batch_strategy=BatchConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+            batch_document_builder=BatchMarkdownDocumentBuilder(),
+        ),
+        service=PdfConversionService(),
     )
     repository.save.return_value = Path("saida/entrada.md")
     extractor.extract.return_value = ExtractionResult(
@@ -169,12 +230,25 @@ def test_convert_document_gera_markdown_sem_persistir() -> None:
     repository = Mock()
     security_scanner = Mock()
     security_policy = Mock()
-    converter = PdfToMarkdownConverter(
+    document_processor = PdfDocumentProcessor(
         extractor=extractor,
         markdown_builder=markdown_builder,
         repository=repository,
         security_scanner=security_scanner,
         security_policy=security_policy,
+    )
+    converter = PdfToMarkdownConverter(
+        document_processor=document_processor,
+        single_file_strategy=SingleFileConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+        ),
+        batch_strategy=BatchConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+            batch_document_builder=BatchMarkdownDocumentBuilder(),
+        ),
+        service=PdfConversionService(),
     )
     extraction_result = ExtractionResult(
         total_pages=3,
@@ -201,12 +275,25 @@ def test_convert_batch_consolida_varios_pdfs_em_um_unico_arquivo() -> None:
     repository = Mock()
     security_scanner = Mock()
     security_policy = Mock()
-    converter = PdfToMarkdownConverter(
+    document_processor = PdfDocumentProcessor(
         extractor=extractor,
         markdown_builder=markdown_builder,
         repository=repository,
         security_scanner=security_scanner,
         security_policy=security_policy,
+    )
+    converter = PdfToMarkdownConverter(
+        document_processor=document_processor,
+        single_file_strategy=SingleFileConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+        ),
+        batch_strategy=BatchConversionStrategy(
+            document_processor=document_processor,
+            repository=repository,
+            batch_document_builder=BatchMarkdownDocumentBuilder(),
+        ),
+        service=PdfConversionService(),
     )
     repository.save.return_value = Path("saida/lote.md")
     extractor.extract.side_effect = [

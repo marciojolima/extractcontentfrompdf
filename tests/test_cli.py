@@ -4,7 +4,11 @@ from pathlib import Path
 import pytest
 
 from extractcontentfrompdf import cli
-from extractcontentfrompdf.converter import PdfToMarkdownConverter
+from extractcontentfrompdf.converter import PdfDocumentProcessor, PdfToMarkdownConverter
+from extractcontentfrompdf.converter.strategies import (
+    BatchConversionStrategy,
+    SingleFileConversionStrategy,
+)
 from extractcontentfrompdf.file_repository import MarkdownFileRepository
 from extractcontentfrompdf.markdown_builder import MarkdownDocumentBuilder
 from extractcontentfrompdf.pdf_extractor import PdfTextExtractor
@@ -17,12 +21,15 @@ def test_build_converter_monta_dependencias_esperadas() -> None:
     converter = cli.build_converter()
 
     assert isinstance(converter, PdfToMarkdownConverter)
-    assert isinstance(converter._extractor, PdfTextExtractor)
-    assert isinstance(converter._extractor._sanitizer, TextSanitizer)
-    assert isinstance(converter._markdown_builder, MarkdownDocumentBuilder)
-    assert isinstance(converter._repository, MarkdownFileRepository)
-    assert isinstance(converter._security_scanner, PdfSecurityScanner)
-    assert isinstance(converter._security_policy, PdfSecurityPolicy)
+    assert isinstance(converter._document_processor, PdfDocumentProcessor)
+    assert isinstance(converter._document_processor._extractor, PdfTextExtractor)
+    assert isinstance(converter._document_processor._extractor._sanitizer, TextSanitizer)
+    assert isinstance(converter._document_processor._markdown_builder, MarkdownDocumentBuilder)
+    assert isinstance(converter._document_processor._repository, MarkdownFileRepository)
+    assert isinstance(converter._document_processor._security_scanner, PdfSecurityScanner)
+    assert isinstance(converter._document_processor._security_policy, PdfSecurityPolicy)
+    assert isinstance(converter._single_file_strategy, SingleFileConversionStrategy)
+    assert isinstance(converter._batch_strategy, BatchConversionStrategy)
 
 
 def test_parse_args_usa_defaults_quando_nenhum_argumento_e_informado() -> None:

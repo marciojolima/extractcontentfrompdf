@@ -7,7 +7,16 @@ import logging
 from pathlib import Path
 from typing import Sequence
 
-from extractcontentfrompdf.converter import PdfToMarkdownConverter
+from extractcontentfrompdf.converter import (
+    BatchMarkdownDocumentBuilder,
+    PdfConversionService,
+    PdfDocumentProcessor,
+    PdfToMarkdownConverter,
+)
+from extractcontentfrompdf.converter.strategies import (
+    BatchConversionStrategy,
+    SingleFileConversionStrategy,
+)
 from extractcontentfrompdf.file_repository import MarkdownFileRepository
 from extractcontentfrompdf.markdown_builder import MarkdownDocumentBuilder
 from extractcontentfrompdf.pdf_extractor import PdfTextExtractor
@@ -34,12 +43,27 @@ def build_converter() -> PdfToMarkdownConverter:
     repository = MarkdownFileRepository()
     security_scanner = PdfSecurityScanner()
     security_policy = PdfSecurityPolicy()
-    return PdfToMarkdownConverter(
+    document_processor = PdfDocumentProcessor(
         extractor=extractor,
         markdown_builder=markdown_builder,
         repository=repository,
         security_scanner=security_scanner,
         security_policy=security_policy,
+    )
+    single_file_strategy = SingleFileConversionStrategy(
+        document_processor=document_processor,
+        repository=repository,
+    )
+    batch_strategy = BatchConversionStrategy(
+        document_processor=document_processor,
+        repository=repository,
+        batch_document_builder=BatchMarkdownDocumentBuilder(),
+    )
+    return PdfToMarkdownConverter(
+        document_processor=document_processor,
+        single_file_strategy=single_file_strategy,
+        batch_strategy=batch_strategy,
+        service=PdfConversionService(),
     )
 
 
